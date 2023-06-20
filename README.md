@@ -1,5 +1,30 @@
 # k8s-exam
 
+## Pod
+
+### Multipod 
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: multi-pod
+  name: multi-pod
+spec:
+  containers:
+  - image: nginx
+    name: jupiter
+    env:
+    - name: type
+      value: planet
+  - image: busybox
+    name: europa
+    command: ["/bin/sh","-c","sleep 4800"]
+    env:
+     - name: type
+       value: moon
+```
 ## admission-plugins
 ps -ef | grep kube-apiserver | grep admission-plugins
 
@@ -8,7 +33,24 @@ kube-apiserver -h | grep enable-admission-plugins
 ## Services
 
 kubectl expose deploy my-webapp --port=80 --target-port=80 --name front-end-service --labels=tier=frontend --type=NodePort
+## Volumes
 
+### Persistent Volumes
+
+```
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: custom-volume
+spec:
+  accessModes: ["ReadWriteMany"]
+  capacity:
+    storage: 50Mi
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /opt/data
+```
 
 ## RBAC
 
@@ -113,7 +155,23 @@ spec:
         path: /opt/time
 ```				
 ## livenessProbe/StartupPobre
-
+```
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx1401
+  namespace: default
+spec:
+  containers:
+    - name: nginx1401
+      image: nginx
+      livenessProbe:
+        exec:
+          command: ["ls /var/www/html/probe"]
+        initialDelaySeconds: 10
+        periodSeconds: 60
+```
 ```
 apiVersion: v1
 kind: Pod
@@ -219,6 +277,26 @@ spec:
 
 ```		  
 ## Ingress
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  name: ingress
+spec:
+  rules:
+  - host: ckad-mock-exam-solution.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: my-video-service
+            port:
+              number: 8080
+        path: /video
+        pathType: Prefix
+```
 ```		
 kind: Ingress
 apiVersion: networking.k8s.io/v1
