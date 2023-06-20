@@ -178,6 +178,28 @@ spec:
 ##  Jobs
 ```
 apiVersion: batch/v1
+kind: Job
+metadata:
+  name: whalesay
+spec:
+  completions: 10
+  backoffLimit: 6
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - command:
+        - sh 
+        - -c
+        - "cowsay I am going to ace CKAD!"
+        image: docker/whalesay
+        name: whalesay
+      restartPolicy: Never
+```
+
+```
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: dice
@@ -249,4 +271,37 @@ spec:
     value: alpha
     operator: Exists
     effect: NoSchedule
+```
+
+# Node Affinity
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: beta-apps
+  name: beta-apps
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: beta-apps
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: beta-apps
+    spec:
+      affinity:
+        nodeAffinity:
+         requiredDuringSchedulingIgnoredDuringExecution:
+           nodeSelectorTerms:
+           - matchExpressions:
+             - key: app_type
+               values: ["beta"]
+               operator: In
+      containers:
+      - image: nginx
+        name: nginx
 ```
