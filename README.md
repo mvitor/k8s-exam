@@ -2,6 +2,9 @@
 
 ## Pod
 
+## Labels
+
+k get pod --selector env=dev --no-headers | wc -l
 ### Multipod 
 ```
 apiVersion: v1
