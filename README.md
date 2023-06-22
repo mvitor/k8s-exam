@@ -429,6 +429,7 @@ kubectl cordon node01
 kubectl uncordon node01
 
 ### Cluster Upgrade
+https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/
 
 #### kubeadm
 
@@ -460,10 +461,30 @@ systemctl restart kubelet
 
  describe pod -n kube-system etcd-controlplane | grep -i crt
 
- ETCDCTL_API=3 etcdctl snapshot save --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key /opt/snapshot-pre-boot.db
+#### Backup 
+ ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379  snapshot save --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key /opt/snapshot-pre-boot.db
 
- ETCDCTL_API=3 etcdctl snapshot restore --data-dir=/var/lib/etcd_restore /opt/snapshot-pre-boot.db
-
+##### Restore 
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/etcd/pki/ca.pem --cert=/etc/etcd/pki/etcd.pem --key=/etc/etcd/pki/etcd-key.pem snapshot restore /root/cluster2.db --data-dir /var/lib/etcd-data-new
  watch "crictl ps | grep etcd"
 
- 
+######
+standalone
+
+vi /etc/systemd/system/etcd.service
+
+```
+ExecStart=/usr/local/bin/etcd \
+  --name etcd-server \
+  --data-dir=/var/lib/etcd-data-new \
+```
+## Context
+k describe pod kube-apiserver-controlplane  -n kube-system | grep -i cert
+kubectl config get-contexts
+
+
+#### CErtificates
+
+
+openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
+
