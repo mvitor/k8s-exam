@@ -415,3 +415,55 @@ spec:
       - image: nginx
         name: nginx
 ```
+ 
+## Maintenance 
+
+### Drain
+kubectl drain node01 --ignore-daemonsets
+
+### Cordon
+
+kubectl cordon node01
+
+
+kubectl uncordon node01
+
+### Cluster Upgrade
+
+#### kubeadm
+
+kubeadm upgrade plan
+
+apt update
+
+##### install the kubeadm version 1.27.0
+
+apt-get install kubeadm=1.27.0-00
+
+
+##### upgrade Kubernetes controlplane node.
+
+kubeadm upgrade apply v1.27.0
+
+
+This will update the kubelet with the version 1.27.0.
+
+apt-get install kubelet=1.27.0-00 
+
+
+#### reload the daemon and restart kubelet service after it has been upgraded.
+
+systemctl daemon-reload
+systemctl restart kubelet
+
+#### Etcd
+
+ describe pod -n kube-system etcd-controlplane | grep -i crt
+
+ ETCDCTL_API=3 etcdctl snapshot save --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key /opt/snapshot-pre-boot.db
+
+ ETCDCTL_API=3 etcdctl snapshot restore --data-dir=/var/lib/etcd_restore /opt/snapshot-pre-boot.db
+
+ watch "crictl ps | grep etcd"
+
+ 
