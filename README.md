@@ -543,3 +543,42 @@ roleRef:
   name: storage-admin
   apiGroup: rbac.authorization.k8s.io
 ```
+## Service account
+kubectl create serviceaccount dashboard-sa
+
+kubectl create token dashboard-sa
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: "2023-07-03T21:02:43Z"
+  generation: 1
+  name: web-dashboard
+  namespace: default
+  resourceVersion: "865"
+  uid: d4d9ea03-0daa-43c8-bc94-90910a5decc5
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: web-dashboard
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: web-dashboard
+    spec:
+      serviceAccountName: dashboard-sa
+      containers:
+      - env:
+
+```
