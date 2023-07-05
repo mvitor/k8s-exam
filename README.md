@@ -1,4 +1,4 @@
-# k8s-exam
+f# k8s-exam
 
 ## Pod
 
@@ -149,7 +149,11 @@ kubectl create secret generic db-secret-xxdf --from-literal=DB_Host=sql01 --from
 
 kubectl create deployment httpd-frontend --image=httpd:2.4-alpine --replicas=3
 
+### Docker registry Secret 
 
+```
+kubectl create secret docker-registry private-reg-cred --docker-username=dock_user --docker-password=dock_password --docker-email=dock_user@myprivateregistry.com --docker-server=myprivateregistry.com:5000
+```
 
 ## Deployment - Scale
 
