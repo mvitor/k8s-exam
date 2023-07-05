@@ -1,4 +1,4 @@
-f# k8s-exam
+# k8s-exam
 
 ## Pod
 
@@ -154,7 +154,20 @@ kubectl create deployment httpd-frontend --image=httpd:2.4-alpine --replicas=3
 ```
 kubectl create secret docker-registry private-reg-cred --docker-username=dock_user --docker-password=dock_password --docker-email=dock_user@myprivateregistry.com --docker-server=myprivateregistry.com:5000
 ```
-
+#### Pod Declaration Docker registry Secret 
+```
+    spec:
+      containers:
+      - image: myprivateregistry.com:5000/nginx:alpine
+        imagePullPolicy: IfNotPresent
+        name: nginx
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: private-reg-cred
+```
 ## Deployment - Scale
 
 kubectl scale deployment --replicas=1 frontend-v2
