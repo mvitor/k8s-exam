@@ -125,9 +125,11 @@ spec:
 ```
 
 ## TLS Certificate
+```
 kubectl create secret tls webhook-server-tls \
   --cert=/root/keys/webhook-server-tls.crt\
   --key=/root/keys/webhook-server-tls.key
+```
 
 ```
 apiVersion: v1
@@ -144,11 +146,13 @@ data:
 ```
 
 ### Literal Secret 
-
+```
 kubectl create secret generic db-secret-xxdf --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
+```
 
+```
 kubectl create deployment httpd-frontend --image=httpd:2.4-alpine --replicas=3
-
+```
 ### Docker registry Secret 
 
 ```
