@@ -379,7 +379,35 @@ spec:
             name: apparels-service
             port:
               number: 8080	  
-```		
+```
+### Network Policies
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: internal-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+    - Egress
+  ingress:
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              name: mysql
+        - podSelector:
+            matchLabels:
+              name: payroll
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 3306
+```
 ## Logs 
 kubectl logs dev-pod-dind-878516 -c log-x | grep WARNING > /opt/dind-878516_logs.txt	  
 
