@@ -685,3 +685,131 @@ spec:
       - env:
 
 ```
+
+### Network Policy troubleshooting
+
+Incoming or outgoing connections are not working because of network policy. In the default namespace, we deployed a default-deny network policy which is interrupting the incoming or outgoing connections.
+
+Now, create a network policy called test-network-policy to allow the connections, as follows:-
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-network-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      run: secure-pod
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          name: webapp-color
+    ports:
+    - protocol: TCP
+      port: 80
+```
+then check the connectivity from the webapp-color pod to the secure-pod:-
+```
+root@controlplane:~$ kubectl exec -it webapp-color -- sh
+/opt # nc -v -z -w 5 secure-service 80
+```
+### ConfigMap/command exec
+Create a namespace called dvl1987 by using the below command:-
+
+$ kubectl create namespace dvl1987
+Solution manifest file to create a configMap called time-config in the given namespace as follows:-
+```
+apiVersion: v1
+data:
+  TIME_FREQ: "10"
+kind: ConfigMap
+metadata:
+  name: time-config
+  namespace: dvl1987
+```  
+Now, create a pod called time-check in the same namespace as follows:-
+```
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: time-check
+  name: time-check
+  namespace: dvl1987
+spec:
+  volumes:
+  - name: log-volume
+    emptyDir: {}
+  containers:
+  - image: busybox
+    name: time-check
+    env:
+    - name: TIME_FREQ
+      valueFrom:
+            configMapKeyRef:
+              name: time-config
+              key: TIME_FREQ
+    volumeMounts:
+    - mountPath: /opt/time
+      name: log-volume
+    command:
+    - "/bin/sh"
+    - "-c"
+    - "while true; do date; sleep $TIME_FREQ;done > /opt/time/time-check.log
+```
+## Deployment Rolling update 
+
+Run the following command to create a manifest for deployment nginx-deploy and save it into a file:-
+
+kubectl create deployment nginx-deploy --image=nginx:1.16 --replicas=4 --dry-run=client -oyaml > nginx-deploy.yaml
+and add the strategy field under the spec section as follows:-
+```
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 2
+```
+So final manifest file for deployment called nginx-deploy should looks like below:-
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+  namespace: default
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 2
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      containers:
+      - image: nginx:1.16
+        imagePullPolicy: IfNotPresent
+        name: nginx
+```
+then run the kubectl apply -f nginx-deploy.yaml to create a deployment resource.
+
+Now, upgrade the deployment's image version using the kubectl set image command:-
+```
+kubectl set image deployment nginx-deploy nginx=nginx:1.17
+```
+Run the kubectl rollout command to undo the update and go back to the previous version:-
+```
+kubectl rollout undo deployment nginx-deploy
+```
